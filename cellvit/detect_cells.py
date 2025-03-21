@@ -27,6 +27,7 @@ def main():
     celldetector = CellViTInferenceMemory(
         model_path=args["model"],
         classifier_path=args["classifier_path"],
+        label_map_path=args["label_map_path"],
         binary=args["binary"],
         gpu=args["gpu"],
         outdir=args["outdir"],

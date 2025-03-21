@@ -52,6 +52,11 @@ class InferenceWSIParser:
             default=None,
         )
         parser.add_argument(
+            "--label_map_path",
+            type=str,
+            help="Path to the lable map of the classifier, if there is nothing inside provided.",
+        )
+        parser.add_argument(
             "--gpu", type=int, help="Cuda-GPU ID for inference. Default: 0", default=0
         )
         parser.add_argument(
@@ -161,6 +166,10 @@ class InferenceWSIParser:
         assert Path(opt["model"]).suffix in (
             [".pth", ".pt"]
         ), "Model checkpoint file must be a .pth file"
+
+        # classifier
+        if opt["classifier_path"] is None and opt["label_map_path"] is not None:
+            raise ValueError("Using 'label_map_path' argument requires to also use 'classifier_path'.")
 
         assert (
             0 <= opt["gpu"] < torch.cuda.device_count()

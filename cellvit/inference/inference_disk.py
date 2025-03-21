@@ -14,6 +14,7 @@
 import os
 import sys
 import uuid
+import yaml
 import warnings
 from pathlib import Path
 from typing import Callable, List, Literal, Union, Tuple
@@ -138,6 +139,7 @@ class CellViTInference:
         model_path: Union[Path, str],
         gpu: int,
         classifier_path: Union[Path, str] = None,
+        label_map_path: Union[Path, str] = None,
         binary: bool = False,
         batch_size: int = 8,
         patch_size: int = 1024,
@@ -179,7 +181,7 @@ class CellViTInference:
         self._instantiate_logger()
         self._load_model()
         self._check_devices(gpu)
-        self._load_classifier(classifier_path)
+        self._load_classifier(classifier_path, label_map_path)
         self._load_inference_transforms()
         self._setup_amp(enforce_mixed_precision=enforce_mixed_precision)
         self._setup_worker()
@@ -260,7 +262,7 @@ class CellViTInference:
             self.batch_size = max_batch_size
             self.logger.info(f"Apply limits - Batch size: {self.batch_size}")
 
-    def _load_classifier(self, classifier_path: Union[Path, str] = None) -> None:
+    def _load_classifier(self, classifier_path: Union[Path, str] = None, label_map_path: Union[Path, str] = None) -> None:
         """Load the classifier if provided
 
         Args:
@@ -271,6 +273,19 @@ class CellViTInference:
         else:
             model_checkpoint = torch.load(classifier_path, map_location="cpu")
             run_conf = unflatten_dict(model_checkpoint["config"], ".")
+
+            if "label_map" not in run_conf["data"] and label_map_path is not None:
+                assert Path(label_map_path).exists(), f"Label map file does not exist: {label_map_path}"
+                
+                with open(
+                    label_map_path,
+                    "r",
+                    encoding="utf-8",
+                ) as fh:
+                    _label_map = yaml.safe_load(fh)
+                
+                assert run_conf["data"]["num_classes"] == len(_label_map)
+                run_conf["data"]["label_map"] = _label_map
 
             model = LinearClassifier(
                 embed_dim=model_checkpoint["model_state_dict"]["fc1.weight"].shape[1],

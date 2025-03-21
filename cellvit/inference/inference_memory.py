@@ -42,6 +42,7 @@ class CellViTInferenceMemory(CellViTInference):
         gpu: int,
         outdir: Union[Path, str],
         classifier_path: Union[Path, str] = None,
+        label_map_path: Union[Path, str] = None,
         binary: bool = False,
         batch_size: int = 8,
         patch_size: int = 1024,
@@ -54,6 +55,7 @@ class CellViTInferenceMemory(CellViTInference):
         super(CellViTInferenceMemory, self).__init__(
             model_path=model_path,
             classifier_path=classifier_path,
+            label_map_path=label_map_path,
             binary=binary,
             gpu=gpu,
             batch_size=batch_size,
