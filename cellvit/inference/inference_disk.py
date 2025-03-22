@@ -716,7 +716,10 @@ class CellViTInference:
                     "color"
                 ] = COLOR_DICT_CELLS[cell_type]
                 geojson_placeholder.append(cell_geojson_object)
-        return geojson_placeholder
+        return {
+            "type": "FeatureCollection",
+            "features": geojson_placeholder,
+        }
 
     def _check_wsi(self, wsi: WSI, resolution: float = 0.25):
         """Check if provided patched WSI is having the right settings
