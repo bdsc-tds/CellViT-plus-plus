@@ -68,6 +68,13 @@ class InferenceWSIParser:
             default=0.25,
         )
         parser.add_argument(
+            "--hardware",
+            type=str,
+            choices=["cucim", "openslide"],
+            default=["cucim"],
+            help="The hardware used to load images. Please use 'cucim' for .svs images, and 'openslide' for .ndpi images."
+        )
+        parser.add_argument(
             "--enforce_amp",
             action="store_true",
             help="Whether to use mixed precision for inference (enforced). Otherwise network default training settings are used."

@@ -46,6 +46,7 @@ def main():
             wsi_path=wsi_path,
             wsi_properties=args.get("wsi_properties", {}),
             resolution=args["resolution"],
+            hardware=args["hardware"],
         )
 
     elif command.lower() == "process_dataset":
@@ -67,6 +68,7 @@ def main():
                     wsi_path=wsi_path,
                     wsi_properties=wsi_properties,
                     resolution=args["resolution"],
+                    hardware=args["hardware"],
                 )
 
         elif args["wsi_folder"] is not None:
@@ -91,6 +93,7 @@ def main():
                     wsi_path=wsi_path,
                     wsi_properties=wsi_properties,
                     resolution=args["resolution"],
+                    hardware=args["hardware"],
                 )
         else:
             raise ValueError("Provide either filelist or wsi_folder.")

@@ -75,6 +75,7 @@ class CellViTInferenceMemory(CellViTInference):
         resolution: float = 0.25,
         apply_prefilter: bool = True,
         filter_patches: bool = False,
+        hardware: str = "cucim",
         **kwargs,
     ) -> None:
         """Process a whole slide image with CellViT.
@@ -115,6 +116,7 @@ class CellViTInferenceMemory(CellViTInference):
             slide_processor_config=dataset_config,
             logger=self.logger,
             transforms=self.inference_transforms,
+            hardware=hardware,
         )
         wsi_inference_dataloader = LivePatchWSIDataloader(
             dataset=wsi_inference_dataset, batch_size=self.batch_size, shuffle=False
