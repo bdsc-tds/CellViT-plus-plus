@@ -35,7 +35,7 @@ import torch.nn.functional as F
 import ujson
 
 from cellvit.config.config import COLOR_DICT_CELLS, TYPE_NUCLEI_DICT_PANNUKE
-from cellvit.config.templates import get_template_point, get_template_segmentation
+from cellvit.config.templates import get_template_point, create_template_segmentation
 from cellvit.data.dataclass.cell_graph import CellGraphDataWSI
 from cellvit.data.dataclass.wsi import WSI, PatchedWSIInference
 from cellvit.inference.overlap_cell_cleaner import OverlapCellCleaner
@@ -677,32 +677,25 @@ class CellViTInference:
         Returns:
             List[dict]: Geojson like list
         """
+        geojson_placeholder: list[dict] = []
+
         if polygons:
             cell_segmentation_df = pd.DataFrame(cell_list)
-            detected_types = sorted(cell_segmentation_df.type.unique())
-            geojson_placeholder = []
-            for cell_type in detected_types:
-                cells = cell_segmentation_df[cell_segmentation_df["type"] == cell_type]
-                contours = cells["contour"].to_list()
-                final_c = []
-                for c in contours:
-                    c.append(c[0])
-                    final_c.append([c])
 
-                cell_geojson_object = get_template_segmentation()
-                cell_geojson_object["id"] = str(uuid.uuid4())
-                cell_geojson_object["geometry"]["coordinates"] = final_c
-                cell_geojson_object["properties"]["classification"][
-                    "name"
-                ] = self.label_map[cell_type]
-                cell_geojson_object["properties"]["classification"][
-                    "color"
-                ] = COLOR_DICT_CELLS[cell_type]
-                geojson_placeholder.append(cell_geojson_object)
+            for _, row in cell_segmentation_df.iterrows():
+                geojson_placeholder.append(
+                    create_template_segmentation(
+                        entry_id=str(uuid.uuid4()),
+                        coords=row["contour"],
+                        name=self.label_map[row["type"]],
+                        gemo_type="Polygon",
+                        obj_type="annotation",
+                        color=COLOR_DICT_CELLS[row["type"]],
+                    ),
+                )
         else:
             cell_detection_df = pd.DataFrame(cell_list)
             detected_types = sorted(cell_detection_df.type.unique())
-            geojson_placeholder = []
             for cell_type in detected_types:
                 cells = cell_detection_df[cell_detection_df["type"] == cell_type]
                 centroids = cells["centroid"].to_list()
@@ -716,6 +709,7 @@ class CellViTInference:
                     "color"
                 ] = COLOR_DICT_CELLS[cell_type]
                 geojson_placeholder.append(cell_geojson_object)
+
         return {
             "type": "FeatureCollection",
             "features": geojson_placeholder,
