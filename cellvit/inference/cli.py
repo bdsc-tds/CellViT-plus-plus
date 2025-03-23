@@ -71,7 +71,7 @@ class InferenceWSIParser:
             "--hardware",
             type=str,
             choices=["cucim", "openslide"],
-            default=["cucim"],
+            default="cucim",
             help="The hardware used to load images. Please use 'cucim' for .svs images, and 'openslide' for .ndpi images."
         )
         parser.add_argument(
